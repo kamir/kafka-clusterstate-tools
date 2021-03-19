@@ -3,6 +3,7 @@ package net.christophschubert.kafka.clusterstate.formats.domain;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import net.christophschubert.kafka.clusterstate.formats.Helpers;
 
 import java.util.*;
 
@@ -106,6 +107,16 @@ public class Project {
             this.name = name;
         }
 
+        public Builder addConsumer(Consumer c) {
+            consumers.add(c);
+            return this;
+        }
+
+        public Builder addConsumer(String principal, String groupId) {
+            consumers.add(new Consumer(principal, groupId, false, null));
+            return this;
+        }
+
         public Builder addProducer(Producer p) {
             producers.add(p);
             return this;
@@ -118,6 +129,11 @@ public class Project {
 
         public Builder addTopic(Topic topic) {
             topics.add(topic);
+            return this;
+        }
+
+        public Builder addStreamsApp(StreamsApp app) {
+            streamsApps.add(app);
             return this;
         }
 

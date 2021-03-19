@@ -4,6 +4,8 @@ projects:
 - name: helloproj
   topics:
     - name: topicA
+      configs:
+        retention.ms: "10000"
     - name: topicB
       dataModel:
         key:
@@ -11,10 +13,16 @@ projects:
         value:
           type: Avro
           schemaFile: "schemas/test.avsc"
+        headers:
+          - name:
+          - description:
+          - optional: true/false
   consumers:
     - principal: "User:xxx"
       groupId: "groupForApp"
       prefixGroup: true
+  producers:
+    - principal: "User:producer"
   streamsApps:
     - principal: "Group:StreamTeam"
       applicationId: "dream-app"

@@ -29,27 +29,6 @@ public class DomainCompiler {
         return new DomainCompiler(namingStrategy, null, rbacStrategy);
     }
 
-    /**
-     * Used to generate fully qualified names for topics, consumer groups as well
-     * we project-wide names for prefixed ACLs and role-bindings.
-     *
-     * Every implementation must fulfill: name(resource).startsWith(projectPrefix(project)) for
-     * each resource which is part of project.
-     *
-     * This invariant holds with the default implementation of name.
-     */
-    interface ResourceNamingStrategy {
-        default String name(ProjectSubResource resource) {
-            return name(resource.parent, resource.id());
-        }
-
-        default String name(Project project, String resourceName) {
-            return projectPrefix(project) + resourceName;
-        }
-
-        String projectPrefix(Project project);
-    }
-
 
     interface ProjectAuthorizationStrategy<A> {
         Set<A> authForProject(Project project, ResourceNamingStrategy namingStrategy);
@@ -63,7 +42,7 @@ public class DomainCompiler {
     //TODO: document properly
     private SerializationInfo ti2si(TypeInformation ti) {
         if (ti == null) return null;
-        return new SerializationInfo(ti.type, ti.schemaFile);
+        return new SerializationInfo(ti.type, ti.schemaFile, ti.subjectNameStrategy);
     }
     //TODO: document properly
     private TopicDataModel convertDataModel(DataModel dm) {

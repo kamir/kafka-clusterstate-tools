@@ -3,9 +3,10 @@ package net.christophschubert.kafka.clusterstate.formats.domain.compiler;
 import net.christophschubert.kafka.clusterstate.formats.domain.Consumer;
 import net.christophschubert.kafka.clusterstate.formats.domain.Producer;
 import net.christophschubert.kafka.clusterstate.formats.domain.StreamsApp;
+import net.christophschubert.kafka.clusterstate.formats.domain.Topic;
 import net.christophschubert.kafka.clusterstate.mds.*;
-import org.apache.kafka.common.resource.ResourceType;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,7 +19,8 @@ public class RbacStrategies {
         return new ExtensibleProjectAuthorizationStrategy<>(
                 new ConsumerRbacStrategy(scope),
                 new ProducerRbacStrategy(scope),
-                new StreamsRbacStrategy(scope)
+                new StreamsRbacStrategy(scope),
+                new ForeignAccessRbacStrategy(scope)
         );
     }
 
@@ -32,7 +34,7 @@ public class RbacStrategies {
 
         //TODO: rename method of interface
         @Override
-        public Set<RbacBindingInScope> acls(Producer producer, DomainCompiler.ResourceNamingStrategy namingStrategy) {
+        public Set<RbacBindingInScope> acls(Producer producer, ResourceNamingStrategy namingStrategy) {
             final Set<RbacBindingInScope> bindings = new HashSet<>();
             final var project = producer.parent;
             final var restrictToTopics = producer.topics;
@@ -66,7 +68,7 @@ public class RbacStrategies {
         }
 
         @Override
-        public Set<RbacBindingInScope> acls(Consumer consumer, DomainCompiler.ResourceNamingStrategy namingStrategy) {
+        public Set<RbacBindingInScope> acls(Consumer consumer, ResourceNamingStrategy namingStrategy) {
             final Set<RbacBindingInScope> bindings = new HashSet<>();
 
             final var project = consumer.parent;
@@ -103,7 +105,7 @@ public class RbacStrategies {
         }
 
         @Override
-        public Set<RbacBindingInScope> acls(StreamsApp streamsApp, DomainCompiler.ResourceNamingStrategy namingStrategy) {
+        public Set<RbacBindingInScope> acls(StreamsApp streamsApp, ResourceNamingStrategy namingStrategy) {
             final Set<RbacBindingInScope> bindings = new HashSet<>();
             final var project = streamsApp.parent;
             final var projectPrefix = namingStrategy.projectPrefix(project);
@@ -120,6 +122,21 @@ public class RbacStrategies {
                     namingStrategy.name(streamsApp), PREFIXED))));
 
             return bindings;
+        }
+    }
+
+    static class ForeignAccessRbacStrategy implements ExtensibleProjectAuthorizationStrategy.ResourceStrategy<RbacBindingInScope, Topic> {
+
+        private final Scope scope;
+
+        public ForeignAccessRbacStrategy(Scope scope) {
+            this.scope = scope;
+        }
+
+        @Override
+        public Set<RbacBindingInScope> acls(Topic resource, ResourceNamingStrategy namingStrategy) {
+            //TODO: implement properly
+            return Collections.emptySet();
         }
     }
 }

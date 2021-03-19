@@ -1,6 +1,7 @@
 package net.christophschubert.kafka.clusterstate.cli;
 
-import net.christophschubert.kafka.clusterstate.MapTools;
+import net.christophschubert.kafka.clusterstate.formats.env.CloudCluster;
+import net.christophschubert.kafka.clusterstate.utils.MapTools;
 import net.christophschubert.kafka.clusterstate.formats.domain.DomainParser;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.slf4j.Logger;
@@ -10,9 +11,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class CLITools {
     static Logger logger = LoggerFactory.getLogger(CLITools.class);
@@ -57,4 +57,24 @@ public class CLITools {
         final String s = path.toString();
         return s.endsWith(".domj") || s.endsWith(".domy");
     }
+
+    /**
+     * Splits a string of the form "k1,v1;k2,v2;k3,v3" into a map
+     * {k1: v1, k2: v2, k3:v3}
+     * @param input
+     * @return
+     */
+    static Map<String, String> parsePrincipalMapping(String input) {
+        final List<String> parts = Arrays.asList(input.split(Pattern.quote(";")));
+        return MapTools.mapFromList(parts, s -> Arrays.asList(s.split(Pattern.quote(","))));
+    }
+
+    static Map<String, String> getClientProps(CloudCluster cluster) {
+        final var props = new HashMap<String, String>();
+        props.putAll(cluster.clientProperties.getOrDefault("kafka", Collections.emptyMap()));
+        props.putAll(cluster.clientProperties.getOrDefault("schemaRegistry", Collections.emptyMap()));
+        return props;
+    }
+
+
 }
