@@ -29,7 +29,9 @@ public class PropertyFileBuilder {
 
             final var substitutions = EnvVarTools.extractEnvVarsForCluster( clusterName, System.getenv() );
 
-            // printProps(substitutions, System.out );
+            System.out.println("----------------------------");
+            printProps(substitutions, System.out );
+            System.out.println("----------------------------");
 
             final StringSubstitutor substitutor = new StringSubstitutor(substitutions);
 
@@ -81,7 +83,10 @@ public class PropertyFileBuilder {
         File cpf = new File( parent.getAbsolutePath() + "/cpf/cp-client-props-" + clusterName + ".properties" );
         File cpfParent = cpf.getParentFile();
         cpfParent.mkdirs();
+
         PrintStream fw = new PrintStream( cpf );
+
+        System.out.println( "> create cluster client-property-file: " + cpf.getAbsolutePath() );
         return fw;
     }
 
@@ -90,7 +95,27 @@ public class PropertyFileBuilder {
     }
 
     void printProps(Properties props, PrintStream out) {
-        props.list( out );
+        System.out.println("=====================");
+
+        Enumeration en = props.propertyNames();
+        while( en.hasMoreElements()  ) {
+            String key = (String)en.nextElement();
+            String line = key + "=" + props.get(key) + "\n";
+            System.out.print(line);
+
+            out.print( line );
+        }
+        out.flush();
+        out.close();
+
+        System.out.println("=====================");
+
+        System.out.println("!!! WARNING !!! ***** property file contains credentials in plain text *****");
+        System.out.println("                ***** it can be used by CLI tools or other clients     *****");
+        System.out.println("                ***** which can't use the KTS library.                 *****");
+
+        System.out.println();
+
     }
     void printProps(Map<String, String> props, PrintStream out) {
         props.forEach((k, v) -> out.println(k + "=" + v));
